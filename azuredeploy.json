@@ -108,10 +108,7 @@
         },
         "_artifactsLocation": "https://raw.githubusercontent.com/ryanberger-az/tryon-jenkins-deploy/master/",
         "_artifactsLocationSasToken": "",
-        "customData": "[concat('#include\n',
-        uri(variables('_artifactsLocation'),
-        concat('cloud-init.txt',
-           variables('_artifactsLocationSasToken'))))]"
+        "customData": "[concat('#include\n',uri(variables('_artifactsLocation'),concat('cloud-init.txt',variables('_artifactsLocationSasToken'))))]"
     },
     "resources": [
         {
