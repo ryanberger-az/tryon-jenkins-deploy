@@ -89,8 +89,8 @@
         }
     },
     "variables": {
-        "publicIpAddressName": "[concat(parameters('vmName'), 'PublicIP' )]",
-        "networkInterfaceName": "[concat(parameters('vmName'),'NetInt')]",
+        "publicIpAddressName": "[concat(parameters('vmName'), 'pip' )]",
+        "networkInterfaceName": "[concat(parameters('vmName'),'nic')]",
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]",
         "osDiskType": "Premium_LRS",
         "subnetAddressPrefix": "10.1.0.0/24",
@@ -105,7 +105,13 @@
                     }
                 ]
             }
-        }
+        },
+        "_artifactsLocation": "https://raw.githubusercontent.com/ryanberger-az/tryon-jenkins-deploy/master/",
+        "_artifactsLocationSasToken": "",
+        "customData": "[concat('#include\n',
+        uri(variables('_artifactsLocation'),
+        concat('cloud-init.txt',
+           variables('_artifactsLocationSasToken'))))]"
     },
     "resources": [
         {
@@ -239,7 +245,8 @@
                     "computerName": "[parameters('vmName')]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPasswordOrKey')]",
-                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
+                    "customData": "[base64(variables('customData'))]"
                 }
             }
         }
