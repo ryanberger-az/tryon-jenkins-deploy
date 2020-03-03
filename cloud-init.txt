@@ -11,12 +11,38 @@ write_files:
       {
         "hosts": ["fd://","tcp://127.0.0.1:2375"]
       }
+  - path: /etc/jenkins/plugins.txt
+    content: |
+      blueocean:1.0.0-b24 
+      blueocean-autofavorite:latest
+      blueocean-commons:1.0.0-b24 
+      blueocean-config:1.0.0-b24 
+      blueocean-dashboard:1.0.0-b24 
+      blueocean-display-url:latest
+      blueocean-github-pipeline:1.0.0-b24 
+      blueocean-git-pipeline:1.0.0-b24 
+      blueocean-i18n:1.0.0-b24 
+      blueocean-events:1.0.0-b24 
+      blueocean-jwt:1.0.0-b24 
+      blueocean-personalization:1.0.0-b24 
+      blueocean-pipeline-api-impl:1.0.0-b24 
+      blueocean-rest:1.0.0-b24 
+      blueocean-rest-impl:1.0.0-b24 
+      blueocean-web:1.0.0-b24 
 runcmd:
+  - apt-get update -y
+  - apt-get upgrade -y
   - apt install openjdk-8-jre-headless -y
+  - apt install maven -y
   - wget -q -O - https://pkg.jenkins.io/debian/jenkins-ci.org.key | sudo apt-key add -
   - sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
-  - apt-get update && apt-get install jenkins -y
+  - apt-get install jenkins -y
   - curl -sSL https://get.docker.com/ | sh
   - usermod -aG docker azureuser
   - usermod -aG docker jenkins
   - service jenkins restart
+  - cd /etc/jenkins/
+  - git clone https://github.com/jenkinsci/plugin-installation-manager-tool
+  - cd plugin-installation-manager-tool
+  - mvn clean package
+  - java -jar plugin-management-cli/target/jenkins-plugin-manager-*.jar --war /usr/share/jenkins/jenkins.war --plugin-file /etc/jenkins/plugins.txt
