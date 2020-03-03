@@ -13,27 +13,19 @@ write_files:
       }
   - path: /etc/jenkins/plugins.txt
     content: |
-      blueocean:latest
-      blueocean-autofavorite:latest
-      blueocean-commons:latest 
-      blueocean-config:latest
-      blueocean-dashboard:latest
-      blueocean-display-url:latest
-      blueocean-github-pipeline:latest
-      blueocean-git-pipeline:latest
-      blueocean-i18n:latest
-      blueocean-events:latest
-      blueocean-jwt:latest
-      blueocean-personalization:latest
-      blueocean-pipeline-api-impl:latest
-      blueocean-rest:latest
-      blueocean-rest-impl:latest
-      blueocean-web:latest
+      blueocean:1.22.0
+      azure-vm-agents:1.4.0
+      azure-container-agents:1.1.1
+      windows-azure-storage:1.1.5
+      azure-credentials:2.0.1
+      azure-acs:1.0.1
+      cloud-stats:0.25    
 runcmd:
   - apt-get update -y
   - apt-get upgrade -y
   - apt install openjdk-8-jre-headless -y
   - apt install maven -y
+  - apt install git -y
   - wget -q -O - https://pkg.jenkins.io/debian/jenkins-ci.org.key | sudo apt-key add -
   - sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
   - apt-get update && apt-get install jenkins -y
@@ -45,7 +37,7 @@ runcmd:
   - git clone https://github.com/jenkinsci/plugin-installation-manager-tool
   - cd plugin-installation-manager-tool
   - wget http://repo.jenkins-ci.org/releases/io/jenkins/plugin-management/plugin-management-cli/1.0.2/plugin-management-cli-1.0.2.jar
-  - jenkins service stop
-  - java -jar /etc/jenkins/plugin-management-cli-1.0.2.jar --war /usr/share/jenkins/jenkins.war --plugin-file /etc/jenkins/plugins.txt --plugin-download-directory /etc/jenkins/plugins/
+  - service jenkins stop
+  - java -jar /etc/jenkins/plugin-installation-manager-tool/plugin-management-cli-1.0.2.jar --war /usr/share/jenkins/jenkins.war --plugin-file /etc/jenkins/plugins.txt --plugin-download-directory /etc/jenkins/plugins/
   - cp /etc/jenkins/plugins/* /var/lib/jenkins/plugins/
   - service jenkins start
