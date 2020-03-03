@@ -36,7 +36,7 @@ runcmd:
   - apt install maven -y
   - wget -q -O - https://pkg.jenkins.io/debian/jenkins-ci.org.key | sudo apt-key add -
   - sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
-  - apt-get install jenkins -y
+  - apt-get update && apt-get install jenkins -y
   - curl -sSL https://get.docker.com/ | sh
   - usermod -aG docker azureuser
   - usermod -aG docker jenkins
@@ -44,5 +44,6 @@ runcmd:
   - cd /etc/jenkins/
   - git clone https://github.com/jenkinsci/plugin-installation-manager-tool
   - cd plugin-installation-manager-tool
-  - mvn clean package
-  - java -jar plugin-management-cli/target/jenkins-plugin-manager-*.jar --war /usr/share/jenkins/jenkins.war --plugin-file /etc/jenkins/plugins.txt
+  - wget http://repo.jenkins-ci.org/releases/io/jenkins/plugin-management/plugin-management-cli/1.0.2/plugin-management-cli-1.0.2.jar
+  - java -jar /etc/jenkins/plugin-management-cli-1.0.2.jar --war /usr/share/jenkins/jenkins.war --plugin-file /etc/jenkins/plugins.txt --plugin-download-directory /etc/jenkins/plugins/
+  - service jenkins restart
