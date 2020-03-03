@@ -19,7 +19,8 @@ write_files:
       windows-azure-storage:1.1.5
       azure-credentials:2.0.1
       azure-acs:1.0.1
-      cloud-stats:0.25    
+      cloud-stats:0.25
+      configuration-as-code:1.36    
 runcmd:
   - apt-get update -y
   - apt-get upgrade -y
