@@ -13,22 +13,22 @@ write_files:
       }
   - path: /etc/jenkins/plugins.txt
     content: |
-      blueocean:1.0.0-b24 
+      blueocean:latest
       blueocean-autofavorite:latest
-      blueocean-commons:1.0.0-b24 
-      blueocean-config:1.0.0-b24 
-      blueocean-dashboard:1.0.0-b24 
+      blueocean-commons:latest 
+      blueocean-config:latest
+      blueocean-dashboard:latest
       blueocean-display-url:latest
-      blueocean-github-pipeline:1.0.0-b24 
-      blueocean-git-pipeline:1.0.0-b24 
-      blueocean-i18n:1.0.0-b24 
-      blueocean-events:1.0.0-b24 
-      blueocean-jwt:1.0.0-b24 
-      blueocean-personalization:1.0.0-b24 
-      blueocean-pipeline-api-impl:1.0.0-b24 
-      blueocean-rest:1.0.0-b24 
-      blueocean-rest-impl:1.0.0-b24 
-      blueocean-web:1.0.0-b24 
+      blueocean-github-pipeline:latest
+      blueocean-git-pipeline:latest
+      blueocean-i18n:latest
+      blueocean-events:latest
+      blueocean-jwt:latest
+      blueocean-personalization:latest
+      blueocean-pipeline-api-impl:latest
+      blueocean-rest:latest
+      blueocean-rest-impl:latest
+      blueocean-web:latest
 runcmd:
   - apt-get update -y
   - apt-get upgrade -y
