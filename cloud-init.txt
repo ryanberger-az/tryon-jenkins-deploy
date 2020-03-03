@@ -45,5 +45,7 @@ runcmd:
   - git clone https://github.com/jenkinsci/plugin-installation-manager-tool
   - cd plugin-installation-manager-tool
   - wget http://repo.jenkins-ci.org/releases/io/jenkins/plugin-management/plugin-management-cli/1.0.2/plugin-management-cli-1.0.2.jar
+  - jenkins service stop
   - java -jar /etc/jenkins/plugin-management-cli-1.0.2.jar --war /usr/share/jenkins/jenkins.war --plugin-file /etc/jenkins/plugins.txt --plugin-download-directory /etc/jenkins/plugins/
-  - service jenkins restart
+  - cp /etc/jenkins/plugins/* /var/lib/jenkins/plugins/
+  - service jenkins start
