@@ -14,6 +14,13 @@ write_files:
   - path: /etc/jenkins/plugins.txt
     content: |
       blueocean:1.22.0
+      timestamper:1.1.1.1
+      ws-cleanup:0.38
+      subversion:2.13.1
+      ssh-slaves:1.31.1
+      email-ext:2.69
+      gradle:1.36
+      pipeline-stage-view:2.13
       azure-vm-agents:1.4.0
       azure-container-agents:1.1.1
       windows-azure-storage:1.1.5
