@@ -20,7 +20,8 @@ write_files:
       azure-credentials:2.0.1
       azure-acs:1.0.1
       cloud-stats:0.25
-      configuration-as-code:1.36    
+      configuration-as-code:1.36
+      powershell:1.4
 runcmd:
   - apt-get update -y
   - apt-get upgrade -y
