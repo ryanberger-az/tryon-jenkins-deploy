@@ -1,0 +1,260 @@
+credentials:
+  system:
+    domainCredentials:
+    - credentials:
+      - azureImds:
+          azureEnvName: "Azure"
+          description: "Local Managed Identities for Azure Resources"
+          id: "azure_service_principal"
+          scope: GLOBAL
+      - basicSSHUserPrivateKey:
+          id: "slave_ssh_key"
+          privateKeySource:
+            directEntry:
+              privateKey: "{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}"
+          scope: GLOBAL
+          username: "jenkins"
+      - usernamePassword:
+          description: "the admin account for the vm agents"
+          id: "agent_admin_account"
+          password: "{AQAAABAAAAAQn9Zr6TEpGOxHj5plswbmuBUx5/Mb6POE57E//BTJaDI=}"
+          scope: GLOBAL
+          username: "agentadmin"
+      - azure:
+          azureEnvironmentName: "Azure"
+          clientId: "a4619477-451a-4896-b546-bed14d6d8d42"
+          clientSecret: "{AQAAABAAAAAwrzs5Ob5KV+n93ZZdAtqRYHr2uzvNjuCBNMSIhPOKsTSSNf3K9TY5Gkyd1n7WFFakjRdGloTfjTq1ANVaaVyv5A==}"
+          description: "Manually created Azure SP"
+          id: "b2e31031-99ad-4730-819f-38f5a6c373ce"
+          scope: GLOBAL
+          subscriptionId: "9a5e29a3-e3fd-4a64-a1b0-b33ac42cc1eb"
+          tenant: "615217e2-0e22-4dad-9e7a-331cb4d5c6ad"
+      - azureStorageAccount:
+          blobEndpointURL: "https://blob.core.windows.net/"
+          description: "The cyclecidev34 storage account"
+          id: "cyclecidev34"
+          scope: GLOBAL
+          storageAccountName: "cyclecidev34"
+          storageKey: "{AQAAABAAAABgU9Gr7pO+2r/19MLNzVqJY3YcNnGp9XzIjWek+YIAkHGBmifmMBU5UD3hLOboD71ZcIX217rn48Pw1KKVA21VSNMeB52ZbYjEN2zDIJ5dGw8iMQo4vIV+ZKUYMdkVARoa7npW72hTMUZkTcGBNce9Rw==}"
+jenkins:
+  agentProtocols:
+  - "JNLP4-connect"
+  - "Ping"
+  authorizationStrategy:
+    projectMatrix:
+      permissions:
+      - "Agent/Build:authenticated"
+      - "Agent/Configure:authenticated"
+      - "Agent/Connect:authenticated"
+      - "Agent/Create:authenticated"
+      - "Agent/Delete:authenticated"
+      - "Agent/Disconnect:authenticated"
+      - "Credentials/Create:authenticated"
+      - "Credentials/Delete:authenticated"
+      - "Credentials/ManageDomains:authenticated"
+      - "Credentials/Update:authenticated"
+      - "Credentials/View:authenticated"
+      - "Job/Build:authenticated"
+      - "Job/Cancel:authenticated"
+      - "Job/Configure:authenticated"
+      - "Job/Create:authenticated"
+      - "Job/Delete:authenticated"
+      - "Job/Discover:anonymous"
+      - "Job/Discover:authenticated"
+      - "Job/Move:authenticated"
+      - "Job/Read:anonymous"
+      - "Job/Read:authenticated"
+      - "Job/Workspace:authenticated"
+      - "Overall/Administer:authenticated"
+      - "Overall/ConfigureUpdateCenter:authenticated"
+      - "Overall/Read:anonymous"
+      - "Overall/Read:authenticated"
+      - "Overall/RunScripts:authenticated"
+      - "Overall/UploadPlugins:authenticated"
+      - "Run/Delete:authenticated"
+      - "Run/Replay:authenticated"
+      - "Run/Update:authenticated"
+      - "SCM/Tag:authenticated"
+      - "View/Configure:authenticated"
+      - "View/Create:authenticated"
+      - "View/Delete:authenticated"
+      - "View/Read:authenticated"
+  clouds:
+  - azureVM:
+      azureCredentialsId: "b2e31031-99ad-4730-819f-38f5a6c373ce"
+      cloudName: "cycleci"
+      deploymentTimeout: 1200
+      existingResourceGroupName: "CycleCI"
+      maxVirtualMachinesLimit: 5
+      newResourceGroupName: "Test"
+      resourceGroupReferenceType: "existing"
+      vmTemplates:
+      - agentLaunchMethod: "SSH"
+        builtInImage: "Ubuntu 16.04 LTS"
+        credentialsId: "agent_admin_account"
+        diskType: "managed"
+        doNotUseMachineIfInitFails: false
+        enableMSI: false
+        enableUAMI: false
+        ephemeralOSDisk: false
+        executeInitScriptAsRoot: false
+        imageReference:
+          publisher: "iadisad"
+          version: "latest"
+        imageTopLevelType: "basic"
+        installDocker: true
+        installGit: true
+        installMaven: false
+        labels: "ubuntu-az"
+        location: "East US 2"
+        newStorageAccountName: "jn7dib8t1lawfbvip4c6aeas"
+        noOfParallelJobs: 1
+        osDiskSize: 0
+        osType: "Linux"
+        preInstallSsh: false
+        retentionStrategy:
+          azureVMCloudRetentionStrategy:
+            idleTerminationMinutes: 3
+        shutdownOnIdle: false
+        storageAccountNameReferenceType: "new"
+        storageAccountType: "Standard_LRS"
+        templateDesc: "Ubuntu based nodes for pipeline testing"
+        templateDisabled: false
+        templateName: "ubuntu-az"
+        usageMode: "Only build jobs with label expressions matching this node"
+        usePrivateIP: false
+        virtualMachineSize: "Standard_D4_v3"
+      - agentLaunchMethod: "SSH"
+        builtInImage: "Windows Server 2016"
+        credentialsId: "agent_admin_account"
+        diskType: "managed"
+        doNotUseMachineIfInitFails: true
+        enableMSI: false
+        enableUAMI: false
+        ephemeralOSDisk: false
+        executeInitScriptAsRoot: true
+        imageReference:
+          version: "latest"
+        imageTopLevelType: "basic"
+        installDocker: false
+        installGit: true
+        installMaven: false
+        labels: "winsrv16-az"
+        location: "East US 2"
+        newStorageAccountName: "jnz1omkauvsnp6b96o1583jq"
+        noOfParallelJobs: 1
+        osDiskSize: 0
+        osType: "Linux"
+        preInstallSsh: true
+        retentionStrategy:
+          azureVMCloudRetentionStrategy:
+            idleTerminationMinutes: 3
+        shutdownOnIdle: false
+        storageAccountNameReferenceType: "new"
+        storageAccountType: "Standard_LRS"
+        templateDisabled: false
+        templateName: "winsrv16-az"
+        usageMode: "Only build jobs with label expressions matching this node"
+        usePrivateIP: false
+        virtualMachineSize: "Standard_D2_v2"
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+  disableRememberMe: false
+  markupFormatter: "plainText"
+  mode: NORMAL
+  myViewsTabBar: "standard"
+  numExecutors: 2
+  primaryView:
+    all:
+      name: "all"
+  projectNamingStrategy: "standard"
+  quietPeriod: 5
+  remotingSecurity:
+    enabled: true
+  scmCheckoutRetryCount: 0
+  slaveAgentPort: 5378
+  updateCenter:
+    sites:
+    - id: "default"
+      url: "https://updates.jenkins.io/update-center.json"
+  views:
+  - all:
+      name: "all"
+  viewsTabBar: "standard"
+security:
+  apiToken:
+    creationOfLegacyTokenEnabled: false
+    tokenGenerationOnCreationEnabled: false
+    usageStatisticsEnabled: true
+  sSHD:
+    port: -1
+unclassified:
+  appInsightsGlobalConfig:
+    appInsightsEnabled: true
+  artifactManager:
+    artifactManagerFactories:
+    - azure:
+        config:
+          container: "pipeline-container"
+          prefix: "htmlreports/"
+          storageCredentialId: "cyclecidev34"
+  bitbucketEndpointConfiguration:
+    endpoints:
+    - bitbucketCloudEndpoint:
+        enableCache: false
+        manageHooks: false
+        repositoriesCacheDuration: 0
+        teamCacheDuration: 0
+  buildStepOperation:
+    enabled: false
+  defaultFolderConfiguration:
+    healthMetrics:
+    - worstChildHealthMetric:
+        recursive: true
+  extendedEmailPublisher:
+    adminRequiredForTemplateTesting: false
+    allowUnregisteredEnabled: false
+    charset: "UTF-8"
+    debugMode: false
+    defaultBody: "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\r\n\r\nCheck\
+      \ console output at $BUILD_URL to view the results."
+    defaultContentType: "text/plain"
+    defaultSubject: "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!"
+    maxAttachmentSize: -1
+    maxAttachmentSizeMb: 0
+    precedenceBulk: false
+    useSsl: false
+    watchingEnabled: false
+  gitHubConfiguration:
+    apiRateLimitChecker: ThrottleForNormalize
+  gitHubPluginConfig:
+    hookUrl: "http://cyclecidev.eastus2.cloudapp.azure.com/github-webhook/"
+  gitSCM:
+    createAccountBasedOnEmail: false
+    showEntireCommitSummaryInChanges: false
+    useExistingAccountWithSameEmail: false
+  location:
+    adminAddress: "address not configured yet <nobody@nowhere>"
+    url: "http://cyclecidev.eastus2.cloudapp.azure.com/"
+  mailer:
+    charset: "UTF-8"
+    useSsl: false
+  pollSCM:
+    pollingThreadCount: 10
+  teamPluginGlobalConfig:
+    configFolderPerNode: false
+    enableTeamPushTriggerForAllJobs: false
+    enableTeamStatusForAllJobs: false
+    userAccountMapper: "domain"
+  timestamperConfig:
+    allPipelines: false
+    elapsedTimeFormat: "'<b>'HH:mm:ss.S'</b> '"
+    systemTimeFormat: "'<b>'HH:mm:ss'</b> '"
+  upstream:
+    globalUpstreamFilterStrategy: UseOldest
+tool:
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
