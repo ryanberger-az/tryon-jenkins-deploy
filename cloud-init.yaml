@@ -27,13 +27,14 @@ write_files:
       azure-credentials:2.0.1
       azure-acs:1.0.1
       cloud-stats:0.25
-      configuration-as-code:1.36    
+      configuration-as-code:1.36
 runcmd:
   - apt-get update -y
   - apt-get upgrade -y
   - apt install openjdk-8-jre-headless -y
   - apt install maven -y
   - apt install git -y
+  - apt install wget -y
   - wget -q -O - https://pkg.jenkins.io/debian/jenkins-ci.org.key | sudo apt-key add -
   - sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
   - apt-get update && apt-get install jenkins -y
@@ -47,5 +48,7 @@ runcmd:
   - wget http://repo.jenkins-ci.org/releases/io/jenkins/plugin-management/plugin-management-cli/1.0.2/plugin-management-cli-1.0.2.jar
   - service jenkins stop
   - java -jar /etc/jenkins/plugin-installation-manager-tool/plugin-management-cli-1.0.2.jar --war /usr/share/jenkins/jenkins.war --plugin-file /etc/jenkins/plugins.txt --plugin-download-directory /etc/jenkins/plugins/
+  - wget -P /etc/jenkins/ https://raw.githubusercontent.com/ryanberger-az/tryon-jenkins-deploy/master/jenkins.yaml
   - cp /etc/jenkins/plugins/* /var/lib/jenkins/plugins/
+  - cp /etc/jenkins/jenkins.yaml /var/lib/jenkins/
   - service jenkins start
