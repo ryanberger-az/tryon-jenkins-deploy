@@ -20,7 +20,6 @@ write_files:
       ssh-slaves:latest
       email-ext:latest
       gradle:latest
-      pipeline-stage-view:latest
       azure-vm-agents:latest
       azure-container-agents:latest
       windows-azure-storage:latest
