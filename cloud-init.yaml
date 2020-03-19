@@ -13,21 +13,21 @@ write_files:
       }
   - path: /etc/jenkins/plugins.txt
     content: |
-      blueocean:1.22.0
-      timestamper:1.1.1.1
-      ws-cleanup:0.38
-      subversion:2.13.1
-      ssh-slaves:1.31.1
-      email-ext:2.69
-      gradle:1.36
-      pipeline-stage-view:2.13
-      azure-vm-agents:1.4.0
-      azure-container-agents:1.1.1
-      windows-azure-storage:1.1.5
-      azure-credentials:2.0.1
-      azure-acs:1.0.1
-      cloud-stats:0.25
-      configuration-as-code:1.36
+      blueocean:latest
+      timestamper:latest
+      ws-cleanup:latest
+      subversion:latest
+      ssh-slaves:latest
+      email-ext:latest
+      gradle:latest
+      pipeline-stage-view:latest
+      azure-vm-agents:latest
+      azure-container-agents:latest
+      windows-azure-storage:latest
+      azure-credentials:latest
+      azure-acs:latest
+      cloud-stats:latest
+      configuration-as-code:latest
 runcmd:
   - apt-get update -y
   - apt-get upgrade -y
