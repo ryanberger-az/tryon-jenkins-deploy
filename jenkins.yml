@@ -44,7 +44,7 @@ jenkins:
         shutdownOnIdle: false
         storageAccountNameReferenceType: "new"
         storageAccountType: "Standard_LRS"
-        templateDesc: "Ubuntu based nodes for pipeline testing"
+        templateDesc: "Ubuntu based nodes for executing Cycle tests via Multi-branch Pipelines."
         templateDisabled: false
         templateName: "ubuntu-az"
         usageMode: "Only build jobs with label expressions matching this node"
@@ -78,6 +78,7 @@ jenkins:
         shutdownOnIdle: false
         storageAccountNameReferenceType: "new"
         storageAccountType: "Standard_LRS"
+        templateDesc: "Windows Server 2016 based nodes for executing Cycle tests via Multi-branch Pipelines."
         templateDisabled: false
         templateName: "winsrv16-az"
         usageMode: "Only build jobs with label expressions matching this node"
