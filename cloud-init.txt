@@ -29,6 +29,8 @@ write_files:
       cloud-stats:latest
       configuration-as-code:latest
       git:latest
+      pipeline-github-lib:latest
+      github-branch-source:latest
       build-pipeline-plugin:latest
       workflow-aggregator:latest
 runcmd:
