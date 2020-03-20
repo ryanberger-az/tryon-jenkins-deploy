@@ -1,0 +1,178 @@
+jenkins:
+  agentProtocols:
+  - "JNLP4-connect"
+  - "Ping"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+  clouds:
+  - azureVM:
+      azureCredentialsId: 
+      cloudName: 
+      deploymentTimeout: 1200
+      existingResourceGroupName: "CycleCI"
+      maxVirtualMachinesLimit: 5
+      newResourceGroupName: "Test"
+      resourceGroupReferenceType: "existing"
+      vmTemplates:
+      - agentLaunchMethod: "SSH"
+        builtInImage: "Ubuntu 16.04 LTS"
+        credentialsId:
+        diskType: "managed"
+        doNotUseMachineIfInitFails: false
+        enableMSI: false
+        enableUAMI: false
+        ephemeralOSDisk: false
+        executeInitScriptAsRoot: false
+        imageReference:
+          publisher: "iadisad"
+          version: "latest"
+        imageTopLevelType: "basic"
+        installDocker: true
+        installGit: true
+        installMaven: false
+        labels: "ubuntu-az"
+        location: "East US 2"
+        newStorageAccountName: 
+        noOfParallelJobs: 1
+        osDiskSize: 0
+        osType: "Linux"
+        preInstallSsh: false
+        retentionStrategy:
+          azureVMCloudRetentionStrategy:
+            idleTerminationMinutes: 3
+        shutdownOnIdle: false
+        storageAccountNameReferenceType: "new"
+        storageAccountType: "Standard_LRS"
+        templateDesc: "Ubuntu based nodes for executing Cycle tests via Multi-branch Pipelines."
+        templateDisabled: false
+        templateName: "ubuntu-az"
+        usageMode: "Only build jobs with label expressions matching this node"
+        usePrivateIP: false
+        virtualMachineSize: "Standard_D4_v3"
+      - agentLaunchMethod: "SSH"
+        builtInImage: "Windows Server 2016"
+        credentialsId: 
+        diskType: "managed"
+        doNotUseMachineIfInitFails: true
+        enableMSI: false
+        enableUAMI: false
+        ephemeralOSDisk: false
+        executeInitScriptAsRoot: true
+        imageReference:
+          version: "latest"
+        imageTopLevelType: "basic"
+        installDocker: false
+        installGit: true
+        installMaven: false
+        labels: "winsrv16-az"
+        location: "East US 2"
+        newStorageAccountName: 
+        noOfParallelJobs: 1
+        osDiskSize: 0
+        osType: "Linux"
+        preInstallSsh: true
+        retentionStrategy:
+          azureVMCloudRetentionStrategy:
+            idleTerminationMinutes: 3
+        shutdownOnIdle: false
+        storageAccountNameReferenceType: "new"
+        storageAccountType: "Standard_LRS"
+        templateDesc: "Windows Server 2016 based nodes for executing Cycle tests via Multi-branch Pipelines."
+        templateDisabled: false
+        templateName: "winsrv16-az"
+        usageMode: "Only build jobs with label expressions matching this node"
+        usePrivateIP: false
+        virtualMachineSize: "Standard_D2_v2"
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+  disableRememberMe: false
+  markupFormatter: "plainText"
+  mode: NORMAL
+  myViewsTabBar: "standard"
+  numExecutors: 2
+  primaryView:
+    all:
+      name: "all"
+  projectNamingStrategy: "standard"
+  quietPeriod: 5
+  remotingSecurity:
+    enabled: true
+  scmCheckoutRetryCount: 0
+  slaveAgentPort: -1
+  updateCenter:
+    sites:
+    - id: "default"
+      url: "https://updates.jenkins.io/update-center.json"
+  views:
+  - all:
+      name: "all"
+  viewsTabBar: "standard"
+security:
+  apiToken:
+    creationOfLegacyTokenEnabled: false
+    tokenGenerationOnCreationEnabled: false
+    usageStatisticsEnabled: true
+  sSHD:
+    port: -1
+unclassified:
+  appInsightsGlobalConfig:
+    appInsightsEnabled: true
+  bitbucketEndpointConfiguration:
+    endpoints:
+    - bitbucketCloudEndpoint:
+        enableCache: false
+        manageHooks: false
+        repositoriesCacheDuration: 0
+        teamCacheDuration: 0
+  buildStepOperation:
+    enabled: false
+  defaultFolderConfiguration:
+    healthMetrics:
+    - worstChildHealthMetric:
+        recursive: true
+  extendedEmailPublisher:
+    adminRequiredForTemplateTesting: false
+    allowUnregisteredEnabled: false
+    charset: "UTF-8"
+    debugMode: false
+    defaultBody: |-
+      $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
+
+      Check console output at $BUILD_URL to view the results.
+    defaultSubject: "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!"
+    maxAttachmentSize: -1
+    maxAttachmentSizeMb: 0
+    precedenceBulk: false
+    useSsl: false
+    watchingEnabled: false
+  gitHubConfiguration:
+    apiRateLimitChecker: ThrottleForNormalize
+  gitHubPluginConfig:
+    hookUrl: "http://localhost:8080/github-webhook/"
+  gitSCM:
+    createAccountBasedOnEmail: false
+    showEntireCommitSummaryInChanges: false
+    useExistingAccountWithSameEmail: false
+  location:
+    adminAddress: "address not configured yet <nobody@nowhere>"
+    url: "http://localhost:8080/"
+  mailer:
+    charset: "UTF-8"
+    useSsl: false
+  mavenModuleSet:
+    localRepository: "default"
+  pollSCM:
+    pollingThreadCount: 10
+  timestamperConfig:
+    allPipelines: false
+    elapsedTimeFormat: "'<b>'HH:mm:ss.S'</b> '"
+    systemTimeFormat: "'<b>'HH:mm:ss'</b> '"
+  upstream:
+    globalUpstreamFilterStrategy: UseOldest
+tool:
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
