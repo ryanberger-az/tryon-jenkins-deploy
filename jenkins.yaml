@@ -126,8 +126,6 @@ unclassified:
         manageHooks: false
         repositoriesCacheDuration: 0
         teamCacheDuration: 0
-  buildStepOperation:
-    enabled: false
   defaultFolderConfiguration:
     healthMetrics:
     - worstChildHealthMetric:
@@ -161,6 +159,8 @@ unclassified:
   mailer:
     charset: "UTF-8"
     useSsl: false
+  mavenModuleSet:
+    localRepository: "default"
   pollSCM:
     pollingThreadCount: 10
   timestamperConfig:
