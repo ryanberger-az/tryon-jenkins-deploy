@@ -79,5 +79,4 @@ runcmd:
   - java -jar /etc/jenkins/plugin-installation-manager-tool/plugin-management-cli-1.0.2.jar --war /usr/share/jenkins/jenkins.war --plugin-file /etc/jenkins/plugins.txt --plugin-download-directory /etc/jenkins/plugins/
   - wget -P /etc/jenkins/ https://raw.githubusercontent.com/ryanberger-az/tryon-jenkins-deploy/master/jenkins.yaml
   - cp /etc/jenkins/plugins/* /var/lib/jenkins/plugins/
-  - cp /etc/jenkins/jenkins.yaml /var/lib/jenkins/
   - service jenkins start
