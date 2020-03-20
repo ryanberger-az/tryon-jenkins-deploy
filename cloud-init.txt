@@ -28,7 +28,7 @@ write_files:
       azure-acs:latest
       cloud-stats:latest
       configuration-as-code:latest
-      github-branch-source:latest
+      git:latest
       build-pipeline-plugin:latest
       workflow-aggregator:latest
 runcmd:
