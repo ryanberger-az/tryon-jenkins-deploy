@@ -11,6 +11,31 @@ write_files:
       {
         "hosts": ["fd://","tcp://127.0.0.1:2375"]
       }
+  - path: /var/lib/jenkins/init.groovy.d/basic-security.groovy
+    content: |
+      #!groovy
+      import jenkins.model.*
+      import hudson.security.*
+      import jenkins.install.InstallState
+
+      def instance = Jenkins.getInstance()
+
+      println "--> creating local user 'admin'"
+      // Create user with custom pass
+      def user = instance.getSecurityRealm().createAccount('admin', 'someAdminPass')
+      user.save()
+
+      def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
+      strategy.setAllowAnonymousRead(false)
+      instance.setAuthorizationStrategy(strategy)
+
+      if (!instance.installState.isSetupComplete()) {
+        println '--> Neutering SetupWizard'
+        InstallState.INITIAL_SETUP_COMPLETED.initializeState()
+      }
+
+      instance.save()
+
   - path: /etc/jenkins/plugins.txt
     content: |
       blueocean:latest
@@ -50,7 +75,7 @@ runcmd:
   - cd plugin-installation-manager-tool
   - wget http://repo.jenkins-ci.org/releases/io/jenkins/plugin-management/plugin-management-cli/1.0.2/plugin-management-cli-1.0.2.jar
   - service jenkins stop
-  - java -jar /etc/jenkins/plugin-installation-manager-tool/plugin-management-cli-1.0.2.jar --war /usr/share/jenkins/jenkins.war --plugin-file /etc/jenkins/plugins.txt --plugin-download-directory /etc/jenkins/plugins/
+  - java -jar /etc/jenkins/plugin-installation-manager-tool/plugin-management-cli-1.0.2.jar --war /usr/share/jenkins/jenkins.war --plugin-file /etc/jenkins/plugins.txt --plugin-download-directory /etc/jenkins/plugins/ --latest
   - wget -P /etc/jenkins/ https://raw.githubusercontent.com/ryanberger-az/tryon-jenkins-deploy/master/jenkins.yaml
   - cp /etc/jenkins/plugins/* /var/lib/jenkins/plugins/
   - cp /etc/jenkins/jenkins.yaml /var/lib/jenkins/
