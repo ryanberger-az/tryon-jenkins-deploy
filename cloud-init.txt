@@ -81,4 +81,5 @@ runcmd:
   - wget -P /etc/jenkins/ https://raw.githubusercontent.com/ryanberger-az/tryon-jenkins-deploy/master/jenkins.yaml
   - cp /etc/jenkins/plugins/* /var/lib/jenkins/plugins/
   - cp /etc/jenkins/jenkins.yaml /var/lib/jenkins/
+  - chown -R jenkins:jenkins /var/lib/jenkins/jenkins.yaml
   - service jenkins start
