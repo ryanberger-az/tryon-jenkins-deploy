@@ -52,6 +52,8 @@ write_files:
       azure-acs:latest
       cloud-stats:latest
       configuration-as-code:latest
+      git:latest
+      pipeline-github-lib:latest
       github-branch-source:latest
       pipeline-stage-view:latest
       build-pipeline-plugin:latest

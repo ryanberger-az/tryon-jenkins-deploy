@@ -7,7 +7,7 @@ jenkins:
       allowAnonymousRead: false
   clouds:
   - azureVM:
-      azureCredentialsId: 
+      azureCredentialsId: "azure-sp"
       cloudName: "cycleci"
       deploymentTimeout: 1200
       existingResourceGroupName: "CycleCI"
