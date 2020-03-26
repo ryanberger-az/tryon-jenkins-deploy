@@ -17,7 +17,7 @@ jenkins:
       vmTemplates:
       - agentLaunchMethod: "SSH"
         builtInImage: "Ubuntu 16.04 LTS"
-        credentialsId: "agent_admin_account"
+        credentialsId: "azure-node-admin"
         diskType: "managed"
         doNotUseMachineIfInitFails: false
         enableMSI: false
@@ -52,7 +52,7 @@ jenkins:
         virtualMachineSize: "Standard_D4_v3"
       - agentLaunchMethod: "SSH"
         builtInImage: "Windows Server 2016"
-        credentialsId: "agent_admin_account"
+        credentialsId: "azure-node-admin "
         diskType: "managed"
         doNotUseMachineIfInitFails: true
         enableMSI: false
