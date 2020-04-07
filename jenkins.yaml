@@ -84,6 +84,94 @@ jenkins:
         usageMode: "Only build jobs with label expressions matching this node"
         usePrivateIP: false
         virtualMachineSize: "Standard_D2_v2"
+      - agentLaunchMethod: "SSH"
+        builtInImage: "Windows Server 2016"
+        credentialsId: "agent_admin_account"
+        diskType: "managed"
+        doNotUseMachineIfInitFails: true
+        enableMSI: false
+        enableUAMI: false
+        ephemeralOSDisk: false
+        executeInitScriptAsRoot: true
+        imageReference:
+          offer: "WindowsServer"
+          publisher: "MicrosoftWindowsServer"
+          sku: "2016-Datacenter"
+          version: "latest"
+        imageTopLevelType: "advanced"
+        initScript: |-
+          # Download and Install Java
+          Set-ExecutionPolicy Unrestricted
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          #Default workspace location
+          Set-Location C:\
+          $source = "http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-windows-x64.exe"
+          $destination = "C:\jdk-8u131-windows-x64.exe"
+          $client = new-object System.Net.WebClient
+          $cookie = "oraclelicense=accept-securebackup-cookie"
+          $client.Headers.Add([System.Net.HttpRequestHeader]::Cookie, $cookie)
+          $client.downloadFile($source, $destination)
+          $proc = Start-Process -FilePath $destination -ArgumentList "/s" -Wait -PassThru
+          $proc.WaitForExit()
+          [System.Environment]::SetEnvironmentVariable("JAVA_HOME", "c:\Program Files\Java\jdk1.8.0_131", "Machine")
+          [System.Environment]::SetEnvironmentVariable("PATH", $Env:Path + ";c:\Program Files\Java\jdk1.8.0_131\bin", "Machine")
+          $Env:Path += ";c:\Program Files\Java\jdk1.8.0_131\bin"
+          #Disable git credential manager, get more details in https://support.cloudbees.com/hc/en-us/articles/221046888-Build-Hang-or-Fail-with-Git-for-Windows
+          git config --system --unset credential.helper
+
+
+          # Install Maven
+          $source = "https://archive.apache.org/dist/maven/maven-3/3.5.2/binaries/apache-maven-3.5.2-bin.zip"
+          $destination = "C:\maven.zip"
+          $webClient = New-Object System.Net.WebClient
+          $webClient.DownloadFile($source, $destination)
+          $shell_app=new-object -com shell.application
+          $zip_file = $shell_app.namespace($destination)
+          mkdir 'C:\Program Files\apache-maven-3.5.2'
+          $destination = $shell_app.namespace('C:\Program Files')
+          $destination.Copyhere($zip_file.items(), 0x14)
+          [System.Environment]::SetEnvironmentVariable("PATH", $Env:Path + ";C:\Program Files\apache-maven-3.5.2\bin", "Machine")
+          $Env:Path += ";C:\Program Files\apache-maven-3.5.2\bin"
+
+
+          # Install Git
+          $source = "https://github.com/git-for-windows/git/releases/latest"
+          $latestRelease = Invoke-WebRequest -UseBasicParsing $source -Headers @{"Accept"="application/json"}
+          $json = $latestRelease.Content | ConvertFrom-Json
+          $latestVersion = $json.tag_name
+          $versionHead = $latestVersion.Substring(1, $latestVersion.IndexOf("windows")-2)
+          $source = "https://github.com/git-for-windows/git/releases/download/v^${versionHead}.windows.1/Git-^${versionHead}-64-bit.exe"
+          $destination = "C:\Git-^${versionHead}-64-bit.exe"
+          $webClient = New-Object System.Net.WebClient
+          $webClient.DownloadFile($source, $destination)
+          $proc = Start-Process -FilePath $destination -ArgumentList "/VERYSILENT" -Wait -PassThru
+          $proc.WaitForExit()
+          $Env:Path += ";C:\Program Files\Git\cmd"
+        installDocker: false
+        installGit: true
+        installMaven: false
+        labels: "winsrv16-az-adv"
+        location: "East US 2"
+        newStorageAccountName: "jnmfvqkmaqqxgyjymjgalrrg"
+        noOfParallelJobs: 1
+        osDiskSize: 0
+        osType: "Windows"
+        preInstallSsh: true
+        retentionStrategy:
+          azureVMCloudRetentionStrategy:
+            idleTerminationMinutes: 3
+        shutdownOnIdle: false
+        storageAccountNameReferenceType: "new"
+        storageAccountType: "Standard_LRS"
+        subnetName: "jenkins"
+        templateDesc: "Advanced Windows Server 2016 based nodes for executing Cycle tests via Multi-branch Pipelines."
+        templateDisabled: false
+        templateName: "winsrv16-az-adv"
+        usageMode: "Only build jobs with label expressions matching this node"
+        usePrivateIP: true
+        virtualMachineSize: "Standard_D4_v3"
+        virtualNetworkName: "jenkins-vnet"
+        virtualNetworkResourceGroupName: "CycleCI"
   crumbIssuer:
     standard:
       excludeClientIPFromCrumb: false
