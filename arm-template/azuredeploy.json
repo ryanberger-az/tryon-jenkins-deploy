@@ -33,16 +33,6 @@
                 "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
             }
         },
-        "deployPublicIpAddress": {
-            "type": "string",
-            "allowedValues": [
-                "Yes",
-                "No"
-            ],
-            "metadata":{
-                "description": "Deploy and associate a Public IP address to be able to connect to the Cycle CI appliance from outside of Azure. Please note there is a NSG in place to only allow SSH traffic, and it will only allow the public/private keypair you used when deploying this template."
-            }
-        },
         "dnsLabelPrefix": {
             "type": "string",
             "defaultValue": "[toLower(concat('cycleci-', uniqueString(resourceGroup().id)))]",
@@ -183,7 +173,6 @@
         {
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2019-02-01",
-            "condition": "[equals(parameters('deployPublicIpAddress'), 'Yes')]",
             "name": "[variables('publicIpAddressName')]",
             "location": "[variables('location')]",
             "properties": {
