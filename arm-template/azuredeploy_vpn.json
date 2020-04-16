@@ -33,21 +33,51 @@
                 "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
             }
         },
-        "deployPublicIpAddress": {
-            "type": "string",
-            "allowedValues": [
-                "Yes",
-                "No"
-            ],
-            "metadata":{
-                "description": "Deploy and associate a Public IP address to be able to connect to the Cycle CI appliance from outside of Azure. Please note there is a NSG in place to only allow SSH traffic, and it will only allow the public/private keypair you used when deploying this template."
-            }
-        },
         "dnsLabelPrefix": {
             "type": "string",
             "defaultValue": "[toLower(concat('cycleci-', uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2s",
+            "allowedValues": [
+                "Standard_B2s",
+                "Standard_D2s_v3",
+                "Standard_D4s_v3"
+            ],
+            "metadata": {
+                "description": "The size of the VM"
+            }
+        },
+        "vpnType": {
+            "type": "string",
+            "metadata": {
+                "description": "Route based or policy based"
+            },
+            "defaultValue": "RouteBased",
+            "allowedValues": [
+                "RouteBased",
+                "PolicyBased"
+            ]
+        },
+        "localGatewayIpAddress": {
+            "type": "string",
+            "defaultValue": "1.1.1.1",
+            "metadata": {
+                "description": "Public IP of your VPN appliance."
+            }
+        },
+        "localAddressPrefix": {
+            "type": "array",
+            "defaultValue": [
+                "192.168.0.0/16",
+                "172.16.0.0/12"
+            ],
+            "metadata": {
+                "description": "The CIDR block(s) representing the address space of the on-prem VPN network's Subnet. Seperate ranges with a ','. These can also altered after the deployment."
             }
         },
         "azureVNetAddressPrefix": {
@@ -64,23 +94,68 @@
                 "description": "CIDR block for VM subnet, subset of azureVNetAddressPrefix address space"
             }
         },
-
-        "vmSize": {
+        "gatewaySubnetPrefix": {
             "type": "string",
-            "defaultValue": "Standard_B2s",
+            "defaultValue": "10.3.200.0/29",
+            "metadata": {
+                "description": "CIDR block for gateway subnet, subset of azureVNetAddressPrefix address space"
+            }
+        },
+        "gatewayName": {
+            "type": "string",
+            "defaultValue": "Azure-VPN-GW",
+            "metadata": {
+                "description": "Arbitrary name for the new gateway"
+            }
+        },
+        "localGatewayName": {
+            "type": "string",
+            "defaultValue": "Azure-Local-GW",
+            "metadata": {
+                "description": "Arbitrary name for the local gateway"
+            }
+        },
+        "gatewaySku": {
+            "type": "string",
+            "defaultValue": "Basic",
             "allowedValues": [
-                "Standard_B2s",
-                "Standard_D2s_v3",
-                "Standard_D4s_v3"
+                "Basic",
+                "VpnGw1",
+                "VpnGw2"
             ],
             "metadata": {
-                "description": "The size of the VM"
+                "description": "The Sku of the Gateway. Basic is recommended for DevTest and simple setups. It will support 10 Site-to-Site tunnels and 100 Mbps throughput. VpnGw1 supports up to 30 S2S tunnels with 650 Mbps throughput. VpnGw3 supports up to 30 S2S tunnels with 1 Gbps throughput. For more info on pricing, check: https://azure.microsoft.com/en-us/pricing/details/vpn-gateway/"
+            }
+        },
+        "ikeVersion": {
+            "type": "string",
+            "defaultValue": "IKEv1",
+            "allowedValues": [
+                "IKEv1",
+                "IKEv2"
+            ],
+            "metadata": {
+                "description": "The Connection Protocol to be used. Either IKEv1 or IKEv2. *This cannot be changed after a connection has been created."
+            }
+        },
+        "connectionName": {
+            "type": "string",
+            "defaultValue": "Azure-to-OnPrem",
+            "metadata": {
+                "description": "Arbitrary name for the new connection between Azure VNet and other network"
+            }
+        },
+        "sharedKey": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Shared key (PSK) for IPSec tunnel"
             }
         }
     },
     "variables": {
-        "publicIpAddressName": "[concat(parameters('vmName'), 'pip' )]",
-        "networkInterfaceName": "[concat(parameters('vmName'),'nic')]",
+        "publicIpAddressName": "[concat(parameters('vmName'), '-pip' )]",
+        "gatewayPublicIPName": "[concat(parameters('gatewayName'), '-pip' )]",
+        "networkInterfaceName": "[concat(parameters('vmName'), '-nic')]",
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
         "osDiskType": "Premium_LRS",
         "linuxConfiguration": {
@@ -94,14 +169,16 @@
                 ]
             }
         },
-        "virtualNetworkName": "cycleci-vnet",
-        "subnetName": "cycleci-subnet",
-        "networkSecurityGroupName": "cycleci-nsg",
+        "virtualNetworkName": "cycleci-azure-vnet",
+        "subnetName": "cycleci-jenkins-subnet",
+        "networkSecurityGroupName": "cycleci-jenkins-nsg",
         "ubuntuOSVersion": "18.04-LTS",
         "location": "[resourceGroup().location]",
         "_artifactsLocation": "https://raw.githubusercontent.com/ryanberger-az/tryon-jenkins-deploy/master/",
         "_artifactsLocationSasToken": "",
-        "customData": "[concat('#include\n',uri(variables('_artifactsLocation'),concat('cloud-init.txt',variables('_artifactsLocationSasToken'))))]"
+        "customData": "[concat('#include\n',uri(variables('_artifactsLocation'),concat('cloud-init.txt',variables('_artifactsLocationSasToken'))))]",
+        "gatewaySubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets/', variables('virtualNetworkName'),'GatewaySubnet')]"
+
     },
     "resources": [
         {
@@ -172,18 +249,88 @@
                     {
                         "name": "[variables('subnetName')]",
                         "properties": {
-                            "addressPrefix": "[parameters('subnetPrefix')]",
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled"
+                            "addressPrefix": "[parameters('subnetPrefix')]"
+                        }
+                    },
+                    {
+                        "name": "GatewaySubnet",
+                        "properties": {
+                            "addressPrefix": "[parameters('gatewaySubnetPrefix')]"
                         }
                     }
                 ]
             }
         },
         {
+            "apiVersion": "2019-04-01",
+            "type": "Microsoft.Network/virtualNetworkGateways",
+            "name": "[parameters('gatewayName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('gatewayPublicIPName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('gatewaySubnetRef')]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayPublicIPName'))]"
+                            }
+                        },
+                        "name": "vnetGatewayConfig"
+                    }
+                ],
+                "sku": {
+                    "name": "[parameters('gatewaySku')]",
+                    "tier": "[parameters('gatewaySku')]"
+                },
+                "gatewayType": "Vpn",
+                "vpnType": "[parameters('vpnType')]",
+                "enableBgp": "false"
+            }
+        },
+        {
+            "apiVersion": "2019-04-01",
+            "type": "Microsoft.Network/localNetworkGateways",
+            "name": "[parameters('localGatewayName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "localNetworkAddressSpace": {
+                    "addressPrefixes": "[parameters('localAddressPrefix')]"
+                },
+                "gatewayIpAddress": "[parameters('localGatewayIpAddress')]"
+            }
+        },
+        {
+            "apiVersion": "2019-04-01",
+            "name": "[parameters('connectionName')]",
+            "type": "Microsoft.Network/connections",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworkGateways/', parameters('gatewayName'))]",
+                "[concat('Microsoft.Network/localNetworkGateways/', parameters('localGatewayName'))]"
+            ],
+            "properties": {
+                "virtualNetworkGateway1": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('gatewayName'))]"
+                },
+                "localNetworkGateway2": {
+                    "id": "[resourceId('Microsoft.Network/localNetworkGateways', parameters('localGatewayName'))]"
+                },
+                "connectionType": "IPsec",
+                "connectionProtocol": "[parameters('ikeVersion')]",
+                "routingWeight": 10,
+                "sharedKey": "[parameters('sharedKey')]"
+            }
+        },
+        {
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2019-02-01",
-            "condition": "[equals(parameters('deployPublicIpAddress'), 'Yes')]",
             "name": "[variables('publicIpAddressName')]",
             "location": "[variables('location')]",
             "properties": {
@@ -197,6 +344,15 @@
             "sku": {
                 "name": "Basic",
                 "tier": "Regional"
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('gatewayPublicIPName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
             }
         },
         {
