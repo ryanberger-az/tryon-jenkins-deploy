@@ -205,9 +205,13 @@
             "type": "string",
             "value": "[parameters('adminUsername')]"
         },
-        "networkInterface":{
-        "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName')),'2016-09-01')]",
-        "type": "object"
-    }
+        "privateIpAddress": {
+            "type": "string",
+            "value": "[reference(variables('networkInterfaceName')).ipConfigurations[0].properties.privateIPAddress]"
+        },
+        "sshCommand": {
+            "type": "string",
+            "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('networkInterfaceName')).ipConfigurations[0].properties.privateIPAddress)]"
+        }
     }
 }
