@@ -22,7 +22,7 @@ write_files:
 
       println "--> creating local user 'admin'"
       // Create user with custom pass
-      def user = instance.getSecurityRealm().createAccount('admin', 'someAdminPass')
+      def user = instance.getSecurityRealm().createAccount('admin', 'F8x19dF@1F=of92zzT!')
       user.save()
 
       def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
