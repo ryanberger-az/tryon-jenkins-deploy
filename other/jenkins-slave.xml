@@ -45,12 +45,8 @@ THE SOFTWARE.
   <!--
     interactive flag causes the empty black Java window to be displayed.
     I'm still debugging this.
-
+  <interactive/>
   -->
-  <!--
-    Hopefully this allows us to interact with the desktop.
-  -->
-  <interactive />
   <!-- 
     Run as the Jenkins credential user!
   -->
