@@ -45,8 +45,21 @@ THE SOFTWARE.
   <!--
     interactive flag causes the empty black Java window to be displayed.
     I'm still debugging this.
-  <interactive />
+
   -->
+  <!--
+    Hopefully this allows us to interact with the desktop.
+  -->
+  <interactive />
+  <!-- 
+    Run as the Jenkins credential user!
+  -->
+  <serviceaccount>
+  <user>agentadmin</user>
+  <password>CycleCI25@2019f!7Fzg!2</password>
+  <allowservicelogon>true</allowservicelogon>
+  </serviceaccount>
+
   <logmode>rotate</logmode>
 
   <onfailure action="restart" />
