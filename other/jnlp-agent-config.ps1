@@ -13,7 +13,8 @@ $DefaultUsername = "agentadmin"
 $DefaultPassword = "CycleCI25@2019f!7Fzg!2"
 Set-ItemProperty $RegPath "AutoAdminLogon" -Value "1" -type String 
 Set-ItemProperty $RegPath "DefaultUsername" -Value "$DefaultUsername" -type String 
-Set-ItemProperty $RegPath "DefaultPassword" -Value "$DefaultPassword" -type String 
+Set-ItemProperty $RegPath "DefaultPassword" -Value "$DefaultPassword" -type String
+reg.exe ADD HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Windows /v NoInteractiveServices /t REG_DWORD /d 0 /f
 
 # Download and Install Java
 Set-ExecutionPolicy Unrestricted -Force
