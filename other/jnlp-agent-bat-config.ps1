@@ -34,7 +34,6 @@ $javaHome = "c:\Program Files\Java\jdk1.8.0_131"
 [System.Environment]::SetEnvironmentVariable("PATH", $Env:Path + ";${javaHome}\bin", "Machine")
 $Env:Path += ";${javaHome}\bin"
 
-
 # Install Git
 $source = "https://github.com/git-for-windows/git/releases/latest"
 $latestRelease = Invoke-WebRequest -UseBasicParsing $source -Headers @{"Accept"="application/json"}
@@ -51,6 +50,10 @@ $Env:Path += ";C:\Program Files\Git\cmd"
 #Disable git credential manager, get more details in https://support.cloudbees.com/hc/en-us/articles/221046888-Build-Hang-or-Fail-with-Git-for-Windows
 git config --system --unset credential.helper
 
+# Install Chocolatey, Chrome, and UltraVNC Server
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+choco install ultravnc --y --ignore-checksums
+choco install googlechrome --y --ignore-checksums
 
 # Install Slaves jar and connect via JNLP
 # Jenkins plugin will dynamically pass the server name and vm name.
@@ -85,7 +88,7 @@ if ($secret) {
 # Put together scheduled task to launch the Jenkins agent via bat file at user login.
 $A = New-ScheduledTaskAction -Execute "c:\jenkins\jenkins-slave.bat"
 $T = New-ScheduledTaskTrigger -AtLogon
-$P = New-ScheduledTaskPrincipal ".\agentadmin"
+$P = New-ScheduledTaskPrincipal "$env:COMPUTERNAME\agentadmin"
 $S = New-ScheduledTaskSettingsSet
 $D = New-ScheduledTask -Action $A -Principal $P -Trigger $T -Settings $S
 Register-ScheduledTask T1 -InputObject $D
