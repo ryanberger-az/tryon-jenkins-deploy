@@ -67,7 +67,7 @@ $destSource = "c:\jenkins\slave.jar"
 $wc = New-Object System.Net.WebClient
 $wc.DownloadFile($slaveSource, $destSource)
 
-# Download the service wrapper
+# Download the bat boilerplate
 $batConfigFile = "c:\jenkins\jenkins-slave.bat"
 $wc.DownloadFile("https://raw.githubusercontent.com/ryanberger-az/tryon-jenkins-deploy/master/other/jenkins-slave.bat", $batConfigFile)
 
@@ -81,7 +81,6 @@ if ($secret) {
 }
 (Get-Content $batConfigFile).replace('@JAVA@', $batConfigExec) | Set-Content $batConfigFile
 (Get-Content $batConfigFile).replace('@ARGS@', $batConfigArgs) | Set-Content $batConfigFile
-(Get-Content $batConfigFile).replace('@SLAVE_JAR_URL', $slaveSource) | Set-Content $batConfigFile
 
 # Put together scheduled task to launch the Jenkins agent via bat file at user login.
 $A = New-ScheduledTaskAction -Execute "c:\jenkins\jenkins-slave.bat"
