@@ -54,6 +54,7 @@ git config --system --unset credential.helper
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 choco install ultravnc --y --ignore-checksums
 choco install googlechrome --y --ignore-checksums
+choco install selenium-all-drivers --y --ignore-checksums
 
 # Install Slaves jar and connect via JNLP
 # Jenkins plugin will dynamically pass the server name and vm name.
