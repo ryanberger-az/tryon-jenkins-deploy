@@ -1,1 +1,1 @@
-@JAVA@ @ARGS@
+"\"@JAVA@"\" @ARGS@
