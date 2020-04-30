@@ -16,6 +16,36 @@ Set-ItemProperty $RegPath "DefaultUsername" -Value "$DefaultUsername" -type Stri
 Set-ItemProperty $RegPath "DefaultPassword" -Value "$DefaultPassword" -type String
 reg.exe ADD HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Windows /v NoInteractiveServices /t REG_DWORD /d 0 /f
 
+# Setting IE Zoom level to 100
+$RegistryKeyPath_Zoom = "HKCU:\SOFTWARE\Microsoft\Internet Explorer\Zoom"
+Set-ItemProperty -Path $RegistryKeyPath_Zoom -Name ZoomFactor -Value 100000
+# Enabling IE protected mode for all zones
+$RegistryKeyPath_Zone1 = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\1"
+Set-ItemProperty -Path $RegistryKeyPath_Zone1 -Name 2500 -Value 0
+$RegistryKeyPath_Zone2 = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\2"
+Set-ItemProperty -Path $RegistryKeyPath_Zone2 -Name 2500 -Value 0
+$RegistryKeyPath_Zone3 = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3"
+Set-ItemProperty -Path $RegistryKeyPath_Zone3 -Name 2500 -Value 0
+$RegistryKeyPath_Zone4 = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\4"
+Set-ItemProperty -Path $RegistryKeyPath_Zone4 -Name 2500 -Value 0
+# Adding IE trusted sites
+$RegistryKeyPath_TrustedSites = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\my.cycleautomation.com"
+New-Item -Path $RegistryKeyPath_TrustedSites -ItemType Directory -Force
+New-ItemProperty -Path $RegistryKeyPath_TrustedSites -Name https -PropertyType DWORD -Value 2 -Force
+# Disable IE Enhanced Protected Mode
+$RegistryKeyPath_IEEnhanced = "HKCU:\SOFTWARE\Microsoft\Internet Explorer\Main"
+New-ItemProperty -Name "Isolation" -Path $RegistryKeyPath_IEEnhanced -Value "PMIL" -PropertyType String
+# Disabled Enhanced Security
+$RegistryKeyPath_AdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
+Set-ItemProperty -Path $RegistryKeyPath_AdminKey -Name IsInstalled -Value 0
+$RegistryKeyPath_UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
+Set-ItemProperty -Path $RegistryKeyPath_UserKey -Name IsInstalled -Value 0
+
+# Disable IE welcome screen
+$RegistryKeyPath_IEWelcome = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main"
+New-Item -Path $RegistryKeyPath_IEWelcome -ItemType Directory -Force
+New-ItemProperty -Path $RegistryKeyPath_IEWelcome -Name DisableFirstRunCustomize -PropertyType DWORD -Value 00000001 -Force
+
 # Download and Install Java
 Set-ExecutionPolicy Unrestricted -Force
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
