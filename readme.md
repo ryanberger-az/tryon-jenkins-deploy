@@ -17,7 +17,6 @@ The folder structure in the repo is meant to keep it organized and also put our 
 
 **other:** We stored some example scripts in here to be used for post-deployment configuration. Things like initialization scripts for the Jenkins Azure VM Agent plugin, etc. 
 
-[![Deploy to Azure](https://azuredeploy.net/deploybutton.svg)](https://deploy.azure.com/?repository=https://bitbucket.org/tryonsolutions/cycle-ci-app-deploy/)
-
+[![Deploy to Azure](https://azurecomcdn.azureedge.net/mediahandler/acomblog/media/Default/blog/deploybutton.png)](https://azuredeploy.net/)
 
 MIT © [Ryan Berger & Art Smith]()
