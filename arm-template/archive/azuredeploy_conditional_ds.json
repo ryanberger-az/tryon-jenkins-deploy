@@ -33,17 +33,6 @@
                 "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
             }
         },
-        "networkInterfaceType": {
-            "type": "string",
-            "defaultValue": "Public",
-            "allowedValues": [
-                "Public",
-                "Private"
-            ],
-            "metadata": {
-                "description": "If you want to access this Ubuntu virtual machine via a public IP address, select Public (good for Dev/Test). If you want this to only be accessible from the Azure VNet, then select Private (most use cases)."
-            }
-        },
         "dnsLabelPrefix": {
             "type": "string",
             "defaultValue": "[toLower(concat('cycleci-', uniqueString(resourceGroup().id)))]",
@@ -200,9 +189,6 @@
     },
     "variables": {
         "publicIpAddressName": "[concat(parameters('vmName'), '-pip' )]",
-        "publicIP1": {
-            "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-pip' ))]"
-        },
         "gatewayPublicIPName": "[concat(parameters('gatewayName'), '-pip' )]",
         "networkInterfaceName": "[concat(parameters('vmName'), '-nic')]",
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
@@ -236,25 +222,6 @@
     },
     "resources": [
         {
-            "type": "Microsoft.Network/publicIpAddresses",
-            "condition": "[equals(parameters('NetworkInterfaceType'),'Public')]",
-            "apiVersion": "2019-02-01",
-            "name": "[variables('publicIpAddressName')]",
-            "location": "[variables('location')]",
-            "properties": {
-                "publicIpAllocationMethod": "Dynamic",
-                "publicIPAddressVersion": "IPv4",
-                "dnsSettings": {
-                    "domainNameLabel": "[parameters('dnsLabelPrefix')]"
-                },
-                "idleTimeoutInMinutes": 4
-            },
-            "sku": {
-                "name": "Basic",
-                "tier": "Regional"
-            }
-        },
-        {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2018-10-01",
             "name": "[variables('networkInterfaceName')]",
@@ -274,7 +241,9 @@
                                 "id": "[if(equals(parameters('deployVpn'),'Yes'), variables('subnetRefVpn'), variables('subnetRef'))]"
                             },
                             "privateIPAllocationMethod": "Dynamic",
-                            "publicIpAddress": "[if(equals(parameters('networkInterfaceType'),'Public'), variables('publicIP1'), json('null'))]"
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                            }
                         }
                     }
                 ],
@@ -431,6 +400,24 @@
             }
         },
         {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2019-02-01",
+            "name": "[variables('publicIpAddressName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "publicIPAddressVersion": "IPv4",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+                },
+                "idleTimeoutInMinutes": 4
+            },
+            "sku": {
+                "name": "Basic",
+                "tier": "Regional"
+            }
+        },
+        {
             "apiVersion": "2015-06-15",
             "condition": "[equals(parameters('deployVpn'),'Yes')]",
             "type": "Microsoft.Network/publicIPAddresses",
@@ -532,11 +519,11 @@
         },
         "hostname": {
             "type": "string",
-            "value": "[if(equals(parameters('networkInterfaceType'),'Public'), reference(variables('publicIPAddressName')).dnsSettings.fqdn, reference(variables('networkInterfaceName')).ipConfigurations[0].properties.privateIPAddress)]"
+            "value": "[reference(variables('publicIPAddressName')).dnsSettings.fqdn]"
         },
         "sshCommand": {
             "type": "string",
-            "value": "[if(equals(parameters('networkInterfaceType'),'Public'), concat('ssh ', parameters('adminUsername'), '@', reference(variables('publicIPAddressName')).dnsSettings.fqdn), concat('ssh ', parameters('adminUsername'), '@', reference(concat(variables('networkInterfaceName'))).ipConfigurations[0].properties.privateIPAddress))]"
+            "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
         },
         "SqlServerURL": {
             "type": "string",

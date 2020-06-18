@@ -1,0 +1,153 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sqlAdministratorLogin": {
+            "type": "string"
+        },
+        "sqlAdministratorLoginPassword": {
+            "type": "securestring"
+        },
+        "deployVpn": {
+            "type": "string"
+        },
+        "virtualNetworkId": {
+            "type": "string"
+        },
+        "virtualNetworkVpnId": {
+            "type": "string"
+        },
+        "subnetRef": {
+            "type": "string"
+        },
+        "subnetRefVpn": {
+            "type": "string"
+        },
+        "subnetName": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "azSqlServer": "[toLower(concat('cyclesql', uniqueString(resourceGroup().id)))]",
+        "azDbName": "[concat(variables('azSqlServer'),'/cycledatastore')]",
+        "privateEndpointName": "sql-private-endpoint",
+        "privateDnsZoneName": "privatelink.database.windows.net",
+        "pvtendpointdnsgroupname": "[concat(variables('privateEndpointName'),'/sqlPrivateLink')]"
+
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2019-06-01-preview",
+            "name": "[variables('azSqlServer')]",
+            "location": "[variables('location')]",
+            "tags": {
+                "displayName": "[variables('azSqlServer')]"
+            },
+            "kind": "v12.0",
+            "properties": {
+                "administratorLogin": "[parameters('sqlAdministratorLogin')]",
+                "administratorLoginPassword": "[parameters('sqlAdministratorLoginPassword')]",
+                "version": "12.0",
+                "publicNetworkAccess": "Disabled"
+            },
+            "resources": [
+            ]
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2019-06-01-preview",
+            "name": "[variables('azDbName')]",
+            "location": "[variables('location')]",
+            "tags": {
+                "displayName": "[variables('azDbName')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('azSqlServer'))]"
+            ],
+            "sku": {
+                "name": "Basic",
+                "tier": "Basic",
+                "capacity": 5
+            },
+            "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "edition": "Basic",
+                "maxSizeBytes": 2147483648,
+                "requestedServiceObjectiveName": "Basic"
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2019-04-01",
+            "name": "[variables('privateEndpointName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "subnet": {
+                    "id": "[if(equals(parameters('deployVpn'),'Yes'),parameters('subnetRefVpn'), parameters('subnetRef'))]"
+                },
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "[variables('privateEndpointName')]",
+                        "properties": {
+                            "privateLinkServiceId": "[resourceId('Microsoft.Sql/servers',variables('azSqlServer'))]",
+                            "groupIds": [
+                                "SqlServer"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2018-09-01",
+            "name": "[variables('privateDnsZoneName')]",
+            "location": "global"
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+            "apiVersion": "2018-09-01",
+            "name": "[concat(variables('privateDnsZoneName'), '/', variables('privateDnsZoneName'), '-link')]",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsZoneName'))]",
+                "[resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointName'))]"
+            ],
+            "properties": {
+                "registrationEnabled": false,
+                "virtualNetwork": {
+                    "id": "[if(equals(parameters('deployVpn'),'Yes'),parameters('virtualNetworkVpnId'), parameters('virtualNetworkId'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('pvtendpointdnsgroupname')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsZoneName'))]",
+                "[variables('privateEndpointName')]"
+            ],
+            "properties": {
+                "privateDnsZoneConfigs": [
+                    {
+                        "name": "config1",
+                        "properties": {
+                            "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsZoneName'))]"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+        "SqlServerURL": {
+            "type": "string",
+            "value": "[reference(variables('azSqlServer')).fullyQualifiedDomainName]"
+        }
+    }
+
+}

@@ -33,6 +33,17 @@
                 "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
             }
         },
+        "networkInterfaceType": {
+            "type": "string",
+            "defaultValue": "Public",
+            "allowedValues": [
+                "Public",
+                "Private"
+            ],
+            "metadata": {
+                "description": "If you want to access this Ubuntu virtual machine via a public IP address, select Public (good for Dev/Test). If you want this to only be accessible from the Azure VNet, then select Private (most use cases)."
+            }
+        },
         "dnsLabelPrefix": {
             "type": "string",
             "defaultValue": "[toLower(concat('cycleci-', uniqueString(resourceGroup().id)))]",
@@ -52,8 +63,47 @@
                 "description": "The size of the VM"
             }
         },
+        "azureVNetAddressPrefix": {
+            "type": "string",
+            "defaultValue": "10.3.0.0/16",
+            "metadata": {
+                "description": "CIDR block representing the address space of the Azure VNet"
+            }
+        },
+        "subnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.3.1.0/24",
+            "metadata": {
+                "description": "CIDR block for VM subnet, subset of azureVNetAddressPrefix address space"
+            }
+        },
+        "deploySqlDatastore": {
+            "type": "string",
+            "defaultValue": "Yes",
+            "metadata": {
+                "description": "Do you want to deploy a Azure SQL based datastore? If yes, this will build a basic level Azure SQL server and database. This can be scaled up or down using the Azure Portal."
+            },
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "sqlAdministratorLogin": {
+            "type": "string",
+            "defaultValue": "cyclesqladmin",
+            "metadata": {
+                "description": "Database administrator login for the Azure SQL Server."
+            }
+        },
+        "sqlAdministratorLoginPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Database administrator password for the Azure SQL Server."
+            }
+        },
         "deployVpn": {
             "type": "string",
+            "defaultValue": "No",
             "metadata": {
                 "description": "Do you want to deploy a VPN Gateway? If yes, you must fill out: VPN Type, Local Gateway IP Address, Gateway Subnet Prefix, Gateway Name, Local Gateway Name, Gateway SKU, IKE Version, Connection Name, and Shared Key."
             },
@@ -88,20 +138,6 @@
             ],
             "metadata": {
                 "description": "The CIDR block(s) representing the address space of the on-prem VPN network's Subnet. Seperate ranges with a ','. These can also altered after the deployment."
-            }
-        },
-        "azureVNetAddressPrefix": {
-            "type": "string",
-            "defaultValue": "10.3.0.0/16",
-            "metadata": {
-                "description": "CIDR block representing the address space of the Azure VNet"
-            }
-        },
-        "subnetPrefix": {
-            "type": "string",
-            "defaultValue": "10.3.1.0/24",
-            "metadata": {
-                "description": "CIDR block for VM subnet, subset of azureVNetAddressPrefix address space"
             }
         },
         "gatewaySubnetPrefix": {
@@ -164,9 +200,14 @@
     },
     "variables": {
         "publicIpAddressName": "[concat(parameters('vmName'), '-pip' )]",
+        "publicIP1": {
+            "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-pip' ))]"
+        },
         "gatewayPublicIPName": "[concat(parameters('gatewayName'), '-pip' )]",
         "networkInterfaceName": "[concat(parameters('vmName'), '-nic')]",
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
+        "subnetRefVpn": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkNameVpn'), variables('subnetName'))]",
+        "azSqlServer": "[toLower(concat('cyclesql', uniqueString(resourceGroup().id)))]",
         "osDiskType": "Premium_LRS",
         "linuxConfiguration": {
             "disablePasswordAuthentication": true,
@@ -181,17 +222,38 @@
         },
         "virtualNetworkName": "cycleci-azure-vnet",
         "virtualNetworkNameVpn": "cycleci-azure-vnet-vpn",
+        "virtualNetworkId": "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "virtualNetworkVpnId": "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkNameVpn'))]",
         "subnetName": "cycleci-jenkins-subnet",
         "networkSecurityGroupName": "cycleci-jenkins-nsg",
         "ubuntuOSVersion": "18.04-LTS",
         "location": "[resourceGroup().location]",
-        "_artifactsLocation": "https://raw.githubusercontent.com/ryanberger-az/tryon-jenkins-deploy/master/",
+        "_artifactsLocation": "https://bitbucket.org/tryonsolutions/cycle-ci-app-deploy/raw/HEAD/",
         "_artifactsLocationSasToken": "",
         "customData": "[concat('#include\n',uri(variables('_artifactsLocation'),concat('cloud-init.txt',variables('_artifactsLocationSasToken'))))]",
-        "gatewaySubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets/', variables('virtualNetworkName'),'GatewaySubnet')]"
+        "gatewaySubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets/', variables('virtualNetworkNameVpn'),'GatewaySubnet')]"
 
     },
     "resources": [
+        {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "condition": "[equals(parameters('NetworkInterfaceType'),'Public')]",
+            "apiVersion": "2019-02-01",
+            "name": "[variables('publicIpAddressName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "publicIPAddressVersion": "IPv4",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+                },
+                "idleTimeoutInMinutes": 4
+            },
+            "sku": {
+                "name": "Basic",
+                "tier": "Regional"
+            }
+        },
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2018-10-01",
@@ -209,12 +271,10 @@
                         "name": "ipconfig1",
                         "properties": {
                             "subnet": {
-                                "id": "[variables('subnetRef')]"
+                                "id": "[if(equals(parameters('deployVpn'),'Yes'), variables('subnetRefVpn'), variables('subnetRef'))]"
                             },
                             "privateIPAllocationMethod": "Dynamic",
-                            "publicIpAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-                            }
+                            "publicIpAddress": "[if(equals(parameters('networkInterfaceType'),'Public'), variables('publicIP1'), json('null'))]"
                         }
                     }
                 ],
@@ -262,7 +322,9 @@
                     {
                         "name": "[variables('subnetName')]",
                         "properties": {
-                            "addressPrefix": "[parameters('subnetPrefix')]"
+                            "addressPrefix": "[parameters('subnetPrefix')]",
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
                         }
                     },
                     {
@@ -290,7 +352,9 @@
                     {
                         "name": "[variables('subnetName')]",
                         "properties": {
-                            "addressPrefix": "[parameters('subnetPrefix')]"
+                            "addressPrefix": "[parameters('subnetPrefix')]",
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
                         }
                     }
                 ]
@@ -367,24 +431,6 @@
             }
         },
         {
-            "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2019-02-01",
-            "name": "[variables('publicIpAddressName')]",
-            "location": "[variables('location')]",
-            "properties": {
-                "publicIpAllocationMethod": "Dynamic",
-                "publicIPAddressVersion": "IPv4",
-                "dnsSettings": {
-                    "domainNameLabel": "[parameters('dnsLabelPrefix')]"
-                },
-                "idleTimeoutInMinutes": 4
-            },
-            "sku": {
-                "name": "Basic",
-                "tier": "Regional"
-            }
-        },
-        {
             "apiVersion": "2015-06-15",
             "condition": "[equals(parameters('deployVpn'),'Yes')]",
             "type": "Microsoft.Network/publicIPAddresses",
@@ -435,6 +481,48 @@
                     "customData": "[base64(variables('customData'))]"
                 }
             }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "deploySqlDatastore",
+            "apiVersion": "2016-02-01",
+            "condition": "[equals(parameters('deploySqlDatastore'), 'Yes')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('_artifactsLocation'), 'arm-template/cycleci_azsqlds.json' )]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "sqlAdministratorLogin": {
+                        "value": "[parameters('sqlAdministratorLogin')]"
+                    },
+                    "sqlAdministratorLoginPassword": {
+                        "value": "[parameters('sqlAdministratorLoginPassword')]"
+                    },
+                    "deployVpn": {
+                        "value": "[parameters('deployVpn')]"
+                    },
+                    "virtualNetworkId": {
+                        "value": "[variables('virtualNetworkId')]"
+                    },
+                    "virtualNetworkVpnId": {
+                        "value": "[variables('virtualNetworkVpnId')]"
+                    },
+                    "subnetRef": {
+                        "value": "[variables('subnetRef')]"
+                    },
+                    "subnetRefVpn": {
+                        "value": "[variables('subnetRefVpn')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('subnetName')]"
+                    }
+                }
+            }
         }
     ],
     "outputs": {
@@ -444,11 +532,15 @@
         },
         "hostname": {
             "type": "string",
-            "value": "[reference(variables('publicIPAddressName')).dnsSettings.fqdn]"
+            "value": "[if(equals(parameters('networkInterfaceType'),'Public'), reference(variables('publicIPAddressName')).dnsSettings.fqdn, reference(variables('networkInterfaceName')).ipConfigurations[0].properties.privateIPAddress)]"
         },
         "sshCommand": {
             "type": "string",
-            "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+            "value": "[if(equals(parameters('networkInterfaceType'),'Public'), concat('ssh ', parameters('adminUsername'), '@', reference(variables('publicIPAddressName')).dnsSettings.fqdn), concat('ssh ', parameters('adminUsername'), '@', reference(concat(variables('networkInterfaceName'))).ipConfigurations[0].properties.privateIPAddress))]"
+        },
+        "SqlServerURL": {
+            "type": "string",
+            "value": "[reference('deploySqlDatastore').outputs.SqlServerUrl.value]"
         }
     }
 }
